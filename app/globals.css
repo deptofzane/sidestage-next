@@ -648,7 +648,17 @@
     border-right-width: 1px;
     --nav-drawer-dir: -1;
   }
-  /* The close button follows the drawer to the other corner. */
+  /*
+   * Close sits below everything on a phone — the very bottom corner, under
+   * the group already anchored there — rather than the top-right it takes on
+   * desktop. `order` alone does it: the bottom group's own `mt-auto` has
+   * already pushed the free space above them both, and a second auto margin
+   * here would split that space and leave Close floating.
+   */
+  .nav-close {
+    order: 1;
+  }
+  /* And it follows the drawer to the other corner when the bar is mirrored. */
   [data-nav-reversed] .nav-close {
     align-self: flex-start;
   }

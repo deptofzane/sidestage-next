@@ -192,6 +192,24 @@ export function Header({ userEmail }: { userEmail?: string | null }) {
     .map((b) => ({ ...b, name: bands.find((x) => x.id === b.bandId)?.name }))
     .filter((b): b is typeof b & { name: string } => Boolean(b.name))
     .sort((a, b) => a.name.localeCompare(b.name));
+  /**
+   * Those bands as menu rows. Hoisted out of `navLinks` because the phone's
+   * hand-ordered bottom group needs them too, and they follow Chat in both.
+   */
+  const otherBandChatLinks: NavLink[] = otherBandChats.map((b) => ({
+    href: `/bands/${b.bandId}/chat`,
+    label: `New chat: ${b.name}`,
+    menuOnly: true,
+    muted: true,
+    // Follow the reader into that band; the row is about going there.
+    onSelect: () => setBandId(b.bandId),
+    badge: {
+      count: b.count,
+      label: `${b.name}: ${chatMessageLabel(b.count, b.mentioned)}`,
+      urgent: b.mentioned,
+    },
+  }));
+
   const navLinks: NavLink[] = [
     {
       href: '/home',
@@ -216,21 +234,7 @@ export function Header({ userEmail }: { userEmail?: string | null }) {
       },
     },
     // Directly under Chat, one row per other band that's waiting.
-    ...otherBandChats.map(
-      (b): NavLink => ({
-        href: `/bands/${b.bandId}/chat`,
-        label: `New chat: ${b.name}`,
-        menuOnly: true,
-        muted: true,
-        // Follow the reader into that band; the row is about going there.
-        onSelect: () => setBandId(b.bandId),
-        badge: {
-          count: b.count,
-          label: `${b.name}: ${chatMessageLabel(b.count, b.mentioned)}`,
-          urgent: b.mentioned,
-        },
-      }),
-    ),
+    ...otherBandChatLinks,
     {
       href: '/open-conversations',
       label: 'Open Conversations',
@@ -250,7 +254,35 @@ export function Header({ userEmail }: { userEmail?: string | null }) {
   const desktopMenuLinks = navLinks.filter((l) => l.menuOnly);
   // Mobile: the `icon` links are tabs in the bar itself; the rest stay in ☰.
   const mobileTabs = navLinks.filter((l) => l.icon);
-  const mobileMenuLinks = navLinks.filter((l) => !l.icon);
+
+  /*
+   * The phone's drawer is hand-ordered into two groups — one reading down from
+   * the top, one anchored to the bottom — rather than following `navLinks`.
+   *
+   * Listed by label so the intended order is readable in one glance. A label
+   * renamed out from under this would silently drop the row, which is what the
+   * two order assertions in `nav-order.spec.ts` are there to catch.
+   */
+  const pickLinks = (labels: string[]) =>
+    labels
+      .map((label) => navLinks.find((l) => l.label === label))
+      .filter((l): l is NavLink => Boolean(l));
+
+  const mobileTopLinks = pickLinks(['Settings', 'File management', 'About']);
+  const mobileBottomLinks: NavLink[] = [
+    ...pickLinks(['Home', 'History', 'Open Conversations', 'Chat']),
+    ...otherBandChatLinks,
+    /*
+     * Events goes to the same page the bar's Overview tab does: `events` is
+     * the band page's default tab. Named explicitly rather than relying on
+     * that default, so this keeps pointing at the events list if the default
+     * ever moves.
+     */
+    {
+      href: selectedBandId ? `/bands/${selectedBandId}?tab=events` : '/bands',
+      label: 'Events',
+    },
+  ];
 
   // Close the menu whenever the route changes.
   useEffect(() => {
@@ -390,6 +422,104 @@ export function Header({ userEmail }: { userEmail?: string | null }) {
     const timer = setTimeout(() => setDrawerMounted(false), NAV_DRAWER_MS);
     return () => clearTimeout(timer);
   }, [menuOpen]);
+
+  /*
+   * Rows both layouts show, in different places. Written once here so the two
+   * bodies below can each position them without the markup existing twice —
+   * the mobile drawer's order has nothing in common with the desktop one, so
+   * they can't share a single flow.
+   */
+  const accountEmailRow = userEmail ? (
+    <div role="presentation" className="px-4 pb-1.5 pt-2 lg:px-3">
+      <span
+        title={userEmail}
+        className="block truncate text-xs minor-text-theme-colors"
+      >
+        {userEmail}
+      </span>
+    </div>
+  ) : null;
+
+  const signOutRow = (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={() => {
+        closeMenu();
+        void signOut({ callbackUrl: '/login' });
+      }}
+      className={menuItemClass(false)}
+    >
+      Sign out
+    </button>
+  );
+
+  /* Opens over the page rather than navigating to /help: help is read *about*
+     whatever you're stuck on, so closing it should put you back there
+     untouched. */
+  const helpRow = (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={() => {
+        closeMenu();
+        setHelpOpen(true);
+      }}
+      className={menuItemClass(false)}
+    >
+      Help
+    </button>
+  );
+
+  /* The band picker, or the way to make a first one — the Band row is this
+     menu's only route to bands, so without one there is no way in at all,
+     which is exactly the state a new account starts in. */
+  const bandRow =
+    bands.length > 0 ? (
+      <button
+        type="button"
+        role="menuitem"
+        onClick={() => setBandsOpen(true)}
+        className={menuItemClass(false) + ' gap-2'}
+      >
+        <span className="font-medium">Band</span>
+        <span className="ml-auto flex min-w-0 items-center gap-1.5">
+          <span className="truncate text-sm minor-text-theme-colors">
+            {currentBandName}
+          </span>
+          <span aria-hidden="true" className="shrink-0 text-neutral-400">
+            ›
+          </span>
+        </span>
+      </button>
+    ) : (
+      <MenuLink
+        href="/bands"
+        label="Create a band"
+        isActive={pathname === '/bands'}
+        onClick={closeMenu}
+      />
+    );
+
+  /** One drawer link, from a `NavLink`. */
+  const renderLink = (link: NavLink) => (
+    <MenuLink
+      key={link.label}
+      href={link.href}
+      label={link.label}
+      isActive={pathname === link.href}
+      onClick={() => {
+        link.onSelect?.();
+        closeMenu();
+      }}
+      badge={link.badge}
+      muted={link.muted}
+    />
+  );
+
+  const divider = (
+    <span aria-hidden="true" className="my-1 border-t border-line" />
+  );
 
   return (
     // z-[45] sits above the player bar (z-40): on mobile the menu opens upward
@@ -545,6 +675,43 @@ export function Header({ userEmail }: { userEmail?: string | null }) {
                  */
                 className="nav-drawer fixed inset-y-0 right-0 z-50 flex w-[min(20rem,85vw)] flex-col gap-0.5 overflow-y-auto border-l p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-[max(0.75rem,env(safe-area-inset-top))] shadow-xl border-line bg-surface"
               >
+                {/*
+                  Close. First in the DOM, so on desktop it is both the first
+                  thing tabbed to and the top-right corner it appears in — the
+                  order a dialog's close button conventionally takes.
+
+                  On a phone it is pushed to the bottom corner instead (see
+                  `.nav-close` in globals.css), where a thumb already is, and
+                  it follows the drawer to the other side when the bar is
+                  mirrored. That leaves visual and tab order diverging on
+                  mobile only, which is where nobody is tabbing.
+
+                  A `menuitem` like its siblings: a bare button inside
+                  `role="menu"` is not a child role the container allows.
+                */}
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={closeMenu}
+                  aria-label="Close menu"
+                  title="Close menu"
+                  className="nav-close flex h-9 w-9 shrink-0 items-center justify-center self-end rounded-full text-fg-dim hover:bg-surface-hover"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="18"
+                    height="18"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M18 6 6 18M6 6l12 12" />
+                  </svg>
+                </button>
+
                 {bandsOpen ? (
                   // Band panel: it replaces the top level rather than nesting
                   // under it, so the list stays readable on a phone.
@@ -561,258 +728,96 @@ export function Header({ userEmail }: { userEmail?: string | null }) {
                       Back
                     </button>
 
-                    <span
-                      aria-hidden="true"
-                      className="my-1 border-t border-line"
-                    />
-
-                    <Link
-                      href="/bands"
-                      role="menuitem"
-                      aria-current={pathname === '/bands' ? 'page' : undefined}
-                      onClick={closeMenu}
-                      className={menuItemClass(pathname === '/bands')}
-                    >
-                      View bands
-                    </Link>
-                    {bands.map((b) => {
-                      const isCurrent = b.id === selectedBandId;
-                      return (
-                        <button
-                          key={b.id}
-                          type="button"
-                          role="menuitemradio"
-                          aria-checked={isCurrent}
-                          onClick={() => selectBand(b.id)}
-                          className={menuItemClass(isCurrent) + ' gap-2'}
-                        >
-                          <span
-                            aria-hidden="true"
-                            className="w-3 shrink-0 text-center text-xs minor-text-theme-colors"
+                    {/* The choices sit at the bottom, where the top level's
+                        everywhere-you-go group is: Back is the way out of this
+                        panel, not one of its options, so it keeps the top on
+                        its own. The gap does the separating a rule used to. */}
+                    <span role="none" className="mt-auto flex flex-col gap-0.5">
+                      <Link
+                        href="/bands"
+                        role="menuitem"
+                        aria-current={
+                          pathname === '/bands' ? 'page' : undefined
+                        }
+                        onClick={closeMenu}
+                        className={menuItemClass(pathname === '/bands')}
+                      >
+                        View bands
+                      </Link>
+                      {bands.map((b) => {
+                        const isCurrent = b.id === selectedBandId;
+                        return (
+                          <button
+                            key={b.id}
+                            type="button"
+                            role="menuitemradio"
+                            aria-checked={isCurrent}
+                            onClick={() => selectBand(b.id)}
+                            className={menuItemClass(isCurrent) + ' gap-2'}
                           >
-                            {isCurrent ? '✓' : ''}
-                          </span>
-                          <span className="min-w-0 truncate">{b.name}</span>
-                        </button>
-                      );
-                    })}
+                            <span
+                              aria-hidden="true"
+                              className="w-3 shrink-0 text-center text-xs minor-text-theme-colors"
+                            >
+                              {isCurrent ? '✓' : ''}
+                            </span>
+                            <span className="min-w-0 truncate">{b.name}</span>
+                          </button>
+                        );
+                      })}
+                    </span>
                   </>
                 ) : (
                   <>
-                    {/* Who you're signed in as. Deliberately not a menuitem:
-                        it's a label, so it takes no focus and has no hover or
-                        active state to suggest otherwise. `role="presentation"`
-                        keeps it out of the menu's item list without hiding the
-                        text, which is still worth announcing. */}
-                    {userEmail && (
-                      <>
-                        <div
-                          role="presentation"
-                          className="px-4 pb-1.5 pt-2 lg:px-3"
-                        >
-                          <span
-                            title={userEmail}
-                            className="block truncate text-xs minor-text-theme-colors"
-                          >
-                            {userEmail}
-                          </span>
-                        </div>
-
-                        <span
-                          aria-hidden="true"
-                          className="my-1 border-t border-line"
-                        />
-                      </>
-                    )}
-
                     {/*
-                      Sign out, twice over: first here on a phone, and last on
-                      desktop below. Rendered twice and picked by `hidden` /
-                      `lg:hidden` rather than moved with CSS `order`, which is
-                      how the two link groups above already split — and which
-                      keeps the tab order matching what's on screen, where
-                      reordering visually would have a keyboard user reach it
-                      last while seeing it first.
+                      The phone's drawer is two anchored groups, not one list:
+                      account and app-level things reading down from the top,
+                      and everywhere-you-go pinned to the bottom where a thumb
+                      reaches. That needs a wrapper each — a subset of a flat
+                      flex column can't be anchored on its own.
 
-                      It sits under the email because the two are one thought:
-                      whose account this is, and the way out of it. Outside the
-                      `userEmail` block, though, since there may not be one.
+                      Desktop keeps its own order below. The two have nothing
+                      in common any more, so they are written separately
+                      rather than one flow reordered by CSS; the shared rows
+                      are built once above and placed by each.
                     */}
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => {
-                        closeMenu();
-                        void signOut({ callbackUrl: '/login' });
-                      }}
-                      className={menuItemClass(false) + ' lg:hidden'}
-                    >
-                      Sign out
-                    </button>
-                    <span
-                      aria-hidden="true"
-                      className="my-1 border-t border-line lg:hidden"
-                    />
-
-                    {bands.length > 0 && (
-                      <>
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => setBandsOpen(true)}
-                          className={menuItemClass(false) + ' gap-2'}
-                        >
-                          <span className="font-medium">Band</span>
-                          <span className="ml-auto flex min-w-0 items-center gap-1.5">
-                            <span className="truncate text-sm minor-text-theme-colors">
-                              {currentBandName}
-                            </span>
-                            <span
-                              aria-hidden="true"
-                              className="shrink-0 text-neutral-400"
-                            >
-                              ›
-                            </span>
-                          </span>
-                        </button>
-
-                        <span
-                          aria-hidden="true"
-                          className="my-1 border-t border-line"
-                        />
-                      </>
-                    )}
-
-                    {/* Nothing to switch between yet. The Band row above is
-                        this menu's only route to bands, so without one there
-                        is no way in from here at all — which is exactly the
-                        state a new account starts in. */}
-                    {bands.length === 0 && (
-                      <>
-                        <MenuLink
-                          href="/bands"
-                          label="Create a band"
-                          isActive={pathname === '/bands'}
-                          onClick={closeMenu}
-                        />
-                        <span
-                          aria-hidden="true"
-                          className="my-1 border-t border-line"
-                        />
-                      </>
-                    )}
-
-                    {/* Whatever the bar doesn't already show: on mobile the
-                        non-tab links, on desktop the `menuOnly` ones. */}
                     <span
                       role="none"
                       className="flex flex-col gap-0.5 lg:hidden"
                     >
-                      {mobileMenuLinks.map((link) => (
-                        <MenuLink
-                          key={link.label}
-                          href={link.href}
-                          label={link.label}
-                          isActive={pathname === link.href}
-                          onClick={() => {
-                            link.onSelect?.();
-                            closeMenu();
-                          }}
-                          badge={link.badge}
-                          muted={link.muted}
-                        />
-                      ))}
+                      {accountEmailRow}
+                      {accountEmailRow && divider}
+                      {signOutRow}
+                      {mobileTopLinks.map(renderLink)}
+                      {helpRow}
                     </span>
+
+                    <span
+                      role="none"
+                      className="mt-auto flex flex-col gap-0.5 lg:hidden"
+                    >
+                      {bandRow}
+                      {mobileBottomLinks.map(renderLink)}
+                    </span>
+
+                    {/* Desktop: the account brackets the menu — email at the
+                        top, the way out at the bottom — with everything the
+                        bar doesn't already show inline in between. */}
                     <span
                       role="none"
                       className="hidden flex-col gap-0.5 lg:flex"
                     >
-                      {desktopMenuLinks.map((link) => (
-                        <MenuLink
-                          key={link.label}
-                          href={link.href}
-                          label={link.label}
-                          isActive={pathname === link.href}
-                          onClick={() => {
-                            link.onSelect?.();
-                            closeMenu();
-                          }}
-                          badge={link.badge}
-                          muted={link.muted}
-                        />
-                      ))}
+                      {accountEmailRow}
+                      {accountEmailRow && divider}
+                      {bandRow}
+                      {divider}
+                      {desktopMenuLinks.map(renderLink)}
+                      {helpRow}
+                      {divider}
+                      {signOutRow}
                     </span>
-
-                    {/* Outside the two link groups above, so it shows at both
-                        breakpoints. Opens over the page rather than navigating
-                        to /help: help is read *about* whatever you're stuck on,
-                        so closing it should put you back there untouched. */}
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => {
-                        closeMenu();
-                        setHelpOpen(true);
-                      }}
-                      className={menuItemClass(false)}
-                    >
-                      Help
-                    </button>
-
-                    {/* Last on desktop, where the account brackets the menu:
-                        the email at the top, the way out at the bottom. The
-                        phone gets its copy at the top instead — see above. */}
-                    <span
-                      aria-hidden="true"
-                      className="my-1 hidden border-t border-line lg:block"
-                    />
-
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => {
-                        closeMenu();
-                        void signOut({ callbackUrl: '/login' });
-                      }}
-                      className={menuItemClass(false) + ' hidden lg:flex'}
-                    >
-                      Sign out
-                    </button>
                   </>
                 )}
-
-                {/*
-                  Close, pinned to the bottom of the drawer — the far corner
-                  from where the eye starts, and the corner the thumb holding
-                  the phone is already near. `mt-auto` puts it there whichever
-                  level is showing; when the bar is mirrored it moves to the
-                  other corner with everything else (see globals.css).
-
-                  A `menuitem` like its siblings: a bare button inside
-                  `role="menu"` is not a child role the container allows.
-                */}
-                <button
-                  type="button"
-                  role="menuitem"
-                  onClick={closeMenu}
-                  aria-label="Close menu"
-                  title="Close menu"
-                  className="nav-close mt-auto flex h-9 w-9 shrink-0 items-center justify-center self-end rounded-full text-fg-dim hover:bg-surface-hover"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="18"
-                    height="18"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M18 6 6 18M6 6l12 12" />
-                  </svg>
-                </button>
               </div>
             )}
           </div>

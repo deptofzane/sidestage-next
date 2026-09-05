@@ -64,17 +64,114 @@ test('by default the drawer comes from the right', async ({ page }) => {
   expect(await closeButtonSide(page)).toBe('right');
 });
 
-test('Sign out leads the menu on a phone', async ({ page }) => {
+/**
+ * Menu item labels in the order they appear on screen, top to bottom.
+ *
+ * Reads text content rather than computing accessible names, so a row that
+ * wraps extra text — Band carries the current band and a chevron — comes back
+ * concatenated. Fine for asking about order, which is all this is for.
+ */
+async function itemOrder(page: Page): Promise<string[]> {
+  const items = page.getByRole('menuitem');
+  const boxes = await items.evaluateAll((els) =>
+    els.map((el) => ({
+      label: el.getAttribute('aria-label') ?? el.textContent?.trim() ?? '',
+      top: el.getBoundingClientRect().top,
+    })),
+  );
+  return boxes.sort((a, b) => a.top - b.top).map((b) => b.label);
+}
+
+test('the phone drawer is two groups, in order', async ({ page }) => {
   await page.goto('/home');
   await openDrawer(page);
-  // Above Band, which is otherwise the first item.
+  const order = await itemOrder(page);
+
+  // Top group, reading down. The email is role="presentation", so it is not
+  // a menuitem and does not appear here — its position is checked below.
+  expect(order.slice(0, 5)).toEqual([
+    'Sign out',
+    'Settings',
+    'File management',
+    'About',
+    'Help',
+  ]);
+
+  // Bottom group, anchored to the bottom, with Close last of all.
+  expect(order.slice(5)).toEqual([
+    expect.stringMatching(/^Band/),
+    'Home',
+    'History',
+    'Open Conversations',
+    'Chat',
+    'Events',
+    'Close menu',
+  ]);
+});
+
+test('the band panel keeps Back on top and its choices at the bottom', async ({
+  page,
+}) => {
+  await page.goto('/home');
+  const drawer = await openDrawer(page);
+  await page.getByRole('menuitem', { name: /^Band/ }).click();
+
+  const back = (await page
+    .getByRole('menuitem', { name: 'Back' })
+    .boundingBox())!;
+  const viewBands = (await page
+    .getByRole('menuitem', { name: 'View bands' })
+    .boundingBox())!;
+  const box = (await drawer.boundingBox())!;
+
+  // Back caps the top; the choices are pushed to the far end.
+  expect(back.y - box.y).toBeLessThan(80);
+  expect(viewBands.y - (back.y + back.height)).toBeGreaterThan(40);
+  expect(viewBands.y).toBeGreaterThan(box.y + box.height / 2);
+});
+
+test('the account email heads the top group', async ({ page }) => {
+  await page.goto('/home');
+  await openDrawer(page);
+  const email = (await page
+    .locator('#app-nav-menu [role="presentation"]')
+    .first()
+    .boundingBox())!;
   const signOut = (await page
     .getByRole('menuitem', { name: 'Sign out' })
+    .boundingBox())!;
+  expect(email.y).toBeLessThan(signOut.y);
+});
+
+test('the two groups are pushed to opposite edges', async ({ page }) => {
+  await page.goto('/home');
+  await openDrawer(page);
+  const drawer = (await page.locator('#app-nav-menu').boundingBox())!;
+  const help = (await page
+    .getByRole('menuitem', { name: 'Help' })
     .boundingBox())!;
   const band = (await page
     .getByRole('menuitem', { name: /^Band/ })
     .boundingBox())!;
-  expect(signOut.y).toBeLessThan(band.y);
+  // A real gap between the groups is the whole point of anchoring them.
+  expect(band.y - (help.y + help.height)).toBeGreaterThan(40);
+  // ...and the bottom group reaches the bottom.
+  expect(drawer.y + drawer.height - band.y).toBeLessThan(drawer.height / 2);
+});
+
+test('on a phone Close sits in the bottom corner', async ({ page }) => {
+  await page.goto('/home');
+  await openDrawer(page);
+  const drawer = (await page.locator('#app-nav-menu').boundingBox())!;
+  const close = (await page
+    .getByRole('menuitem', { name: 'Close menu' })
+    .boundingBox())!;
+  // Below every menu item, and against the drawer's own bottom padding.
+  const signOut = (await page
+    .getByRole('menuitem', { name: 'Sign out' })
+    .boundingBox())!;
+  expect(close.y).toBeGreaterThan(signOut.y);
+  expect(drawer.y + drawer.height - (close.y + close.height)).toBeLessThan(20);
 });
 
 test('the close button shuts the drawer', async ({ page }) => {
@@ -128,6 +225,22 @@ test.describe('desktop is left alone', () => {
     viewport: { width: 1280, height: 900 },
     isMobile: false,
     hasTouch: false,
+  });
+
+  test('Close sits at the top right', async ({ page }) => {
+    await page.goto('/home');
+    await openDrawer(page);
+    const drawer = (await page.locator('#app-nav-menu').boundingBox())!;
+    const close = (await page
+      .getByRole('menuitem', { name: 'Close menu' })
+      .boundingBox())!;
+    const band = (await page
+      .getByRole('menuitem', { name: /^Band/ })
+      .boundingBox())!;
+    // Above the first menu item, and against the top-right corner.
+    expect(close.y).toBeLessThan(band.y);
+    expect(close.y - drawer.y).toBeLessThan(20);
+    expect(drawer.x + drawer.width - (close.x + close.width)).toBeLessThan(20);
   });
 
   test('Sign out stays last, below Help', async ({ page }) => {

@@ -111,7 +111,13 @@ test('sorting by size reverses on a second click', async ({ page }) => {
   expect(descending).toEqual([...ascending].reverse());
 });
 
-test('the ☰ menu offers File management, above Settings', async ({ page }) => {
+/*
+ * Note the direction: on a phone File management sits *below* Settings, in
+ * the drawer's hand-ordered top group (see nav-order.spec.ts). Desktop still
+ * lists it above, following `navLinks` order — this suite runs at a phone
+ * viewport, so it asserts the phone's answer.
+ */
+test('the ☰ menu offers File management, below Settings', async ({ page }) => {
   await page.goto(`/bands/${seed.bandId}`);
   await page.getByRole('button', { name: 'Menu' }).click();
 
@@ -121,7 +127,7 @@ test('the ☰ menu offers File management, above Settings', async ({ page }) => 
 
   const filesBox = await files.boundingBox();
   const settingsBox = await settings.boundingBox();
-  expect(filesBox!.y).toBeLessThan(settingsBox!.y);
+  expect(filesBox!.y).toBeGreaterThan(settingsBox!.y);
 
   await files.click();
   await expect(

@@ -412,7 +412,9 @@ harmlessly) and any real Google/Resend call.
   screen was retired into Practice, which absorbed its comments panel; the
   redirect preserves the query string so old links keep their `?from=`.
 - `/bands/[id]/files` — File management (storage total, every file, owners-only
-  delete). Reached from ☰, directly above Settings.
+  delete). Reached from ☰ — directly below Settings on a phone, where the
+  drawer's top group is hand-ordered; above it on desktop, which still follows
+  `navLinks` order.
 - **History (`/history`) is the selected band's**, not every band's, and lives
   in ☰ rather than the desktop bar. Its three panels wait for
   `useCurrentBand().loaded` before fetching — `bandId` is `''` both while the
