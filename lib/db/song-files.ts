@@ -870,7 +870,7 @@ export interface BandUpload {
   isDefault: boolean;
   /** When this file was uploaded — the day it belongs to. */
   createdAt: string;
-  originalBand: string | null;
+  originalArtist: string | null;
   bpm: number | null;
   key: string | null;
 }
@@ -909,7 +909,7 @@ export async function listBandUploads(
       songLength: songFiles.songLength,
       isDefault: songFiles.isDefault,
       createdAt: songFiles.createdAt,
-      originalBand: conversations.originalBand,
+      originalArtist: conversations.originalArtist,
       bpm: conversations.bpm,
       key: conversations.key,
     })

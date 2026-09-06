@@ -7,6 +7,7 @@ import { formatDuration, formatSongMeta } from '@/lib/format';
 import { PageHeader } from '../../../../PageHeader';
 import { SetlistActions } from './SetlistActions';
 import { SetlistSongActions } from './SetlistSongActions';
+import { SongTitle } from '../../../../SongTitle';
 
 /**
  * View a setlist: its name and songs in order. Server shell — the setlist
@@ -50,7 +51,7 @@ export default async function SetlistPage({
               href={`/notes/${s.conversationId}/practice`}
               className="hover:underline"
             >
-              {s.name}
+              <SongTitle title={s.name} originalArtist={s.originalArtist} />
             </Link>
             {s.songLength ? (
               <span className="text-neutral-400">

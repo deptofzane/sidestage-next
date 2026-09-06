@@ -728,11 +728,24 @@ export function Header({ userEmail }: { userEmail?: string | null }) {
                       Back
                     </button>
 
-                    {/* The choices sit at the bottom, where the top level's
-                        everywhere-you-go group is: Back is the way out of this
-                        panel, not one of its options, so it keeps the top on
-                        its own. The gap does the separating a rule used to. */}
-                    <span role="none" className="mt-auto flex flex-col gap-0.5">
+                    {/* A rule under Back on desktop, where the choices follow
+                        it directly. On a phone they are anchored to the far end
+                        instead and the gap does that job, so it would be a line
+                        drawn under nothing. */}
+                    <span
+                      aria-hidden="true"
+                      className="my-1 hidden border-t border-line lg:block"
+                    />
+
+                    {/* On a phone the choices sit at the bottom, where the top
+                        level's everywhere-you-go group is — Back is the way out
+                        of this panel, not one of its options, so it keeps the
+                        top to itself. Desktop has no thumb to reach with, so
+                        they stay directly under Back as they always have. */}
+                    <span
+                      role="none"
+                      className="mt-auto flex flex-col gap-0.5 lg:mt-0"
+                    >
                       <Link
                         href="/bands"
                         role="menuitem"

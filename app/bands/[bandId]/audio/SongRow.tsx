@@ -69,7 +69,7 @@ export function SongRow({
         fileName: c.audioStoredName ?? undefined,
         mimeType: c.audioMimeType ?? undefined,
         href: `/notes/${c.id}/practice?from=audio`,
-        originalBand: c.originalBand ?? undefined,
+        originalArtist: c.originalArtist ?? undefined,
         bpm: c.bpm,
         songKey: c.key,
         // Tempo and key first — that's what's useful while the song is
@@ -147,9 +147,9 @@ export function SongRow({
             </span>
           )}
         </div>
-        {c.originalBand && (
+        {c.originalArtist && (
           <div className="mt-0.5 truncate text-xs minor-text-theme-colors">
-            Originally by {c.originalBand}
+            Originally by {c.originalArtist}
           </div>
         )}
         {meta && (

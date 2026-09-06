@@ -10,6 +10,7 @@ import { SetlistItemsEditor, type SetlistItem } from '../SetlistItemsEditor';
 interface SongOption {
   id: string;
   name: string;
+  originalArtist: string | null;
 }
 
 /**
@@ -33,7 +34,11 @@ export function NewSetlistClient({
   const [items, setItems] = useState<SetlistItem[]>([]);
   const [busy, setBusy] = useState(false);
 
-  const songPool = songs.map((s) => ({ conversationId: s.id, name: s.name }));
+  const songPool = songs.map((s) => ({
+    conversationId: s.id,
+    name: s.name,
+    originalArtist: s.originalArtist,
+  }));
 
   const handleDone = async () => {
     const trimmed = name.trim();

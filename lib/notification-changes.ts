@@ -34,7 +34,7 @@ const EVENT_FIELD_LABELS: Record<string, string> = {
  * field edits, and each gets its own sentence — see `describeSongChange`.
  */
 const SONG_FIELD_LABELS: Record<string, string> = {
-  originalBand: 'original artist',
+  originalArtist: 'original artist',
   bpm: 'tempo',
   key: 'key',
 };

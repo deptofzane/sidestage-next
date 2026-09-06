@@ -11,6 +11,7 @@ import { useCanGoBack } from '@/app/NavigationHistoryProvider';
 interface BandSong {
   conversationId: string;
   name: string;
+  originalArtist: string | null;
 }
 
 /**

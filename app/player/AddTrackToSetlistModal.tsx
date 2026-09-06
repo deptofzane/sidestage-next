@@ -7,6 +7,7 @@ import { LoadingBlock } from '../Spinner';
 import { useToast } from '../ToastProvider';
 import { useTrackPending } from '../PendingActionProvider';
 import type { PlaylistTrack } from './PlaylistPlayer';
+import { SongTitle } from '../SongTitle';
 
 type BandSetlists = {
   bandId: string;
@@ -105,7 +106,9 @@ export function AddTrackToSetlistModal({
       <h2 id="queue-add-setlist-title" className="text-base font-semibold">
         Add to setlist
       </h2>
-      <p className="mt-1 truncate text-sm text-fg-muted">{track.title}</p>
+      <p className="mt-1 text-sm text-fg-muted">
+        <SongTitle title={track.title} originalArtist={track.originalArtist} />
+      </p>
 
       {loadError ? (
         <p className="mt-4 rounded-md border border-danger-line bg-danger-fill px-3 py-2 text-sm text-danger-strong">

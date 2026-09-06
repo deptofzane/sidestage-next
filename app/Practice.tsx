@@ -19,6 +19,7 @@ import {
   type SheetMusicMeta,
 } from './notes/[conversationId]/SheetMusic';
 import Link from 'next/link';
+import { SongTitle } from './SongTitle';
 import {
   useEffect,
   type Dispatch,
@@ -34,7 +35,7 @@ export interface PracticeSong {
   /** Audio MIME type; defaults to audio/mpeg when unknown. */
   mimeType?: string;
   /** Who the song is originally by, for covers. */
-  originalBand?: string | null;
+  originalArtist?: string | null;
   /** Tempo / musical key, shown by the player when known. */
   bpm?: number | null;
   songKey?: string | null;
@@ -287,7 +288,12 @@ export function Practice({
             align="center"
           >
             <span className="text-sm">
-              <span className="font-medium">{song.title}</span>
+              <span className="font-medium">
+                <SongTitle
+                  title={song.title}
+                  originalArtist={song.originalArtist}
+                />
+              </span>
               <span className="minor-text-theme-colors">
                 {' '}
                 - {current + 1}/{total}
@@ -321,7 +327,7 @@ export function Practice({
               mimeType={song.mimeType ?? 'audio/mpeg'}
               conversationId={song.conversationId}
               versions={song.audioVersions}
-              originalBand={song.originalBand}
+              originalArtist={song.originalArtist}
               bpm={song.bpm}
               songKey={song.songKey}
               variant={isDesktop ? 'rail' : 'bar'}

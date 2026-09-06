@@ -25,6 +25,7 @@ import { OfflineBadge } from '../../../offline/OfflineBadge';
 import { usePlaylistPlayer } from '../../../player/PlaylistPlayer';
 import { shuffledCopy } from '../../../player/queueOrder';
 import { liveHref, practiceHref, setlistHref } from '@/lib/routes';
+import { SongTitle } from '../../../SongTitle';
 import {
   MinimizeToggle,
   setlistQueue,
@@ -291,15 +292,20 @@ export function BandSetlistsTab({
                         : 'text-xs py-1 font-semibold uppercase tracking-wide text-neutral-400')
                     }
                   >
-                    <ol>
-                      {i + 1} &nbsp; {s.name}
-                      {meta && (
-                        <span className="minor-text-theme-colors">
-                          {' '}
-                          · {meta}
-                        </span>
-                      )}
-                    </ol>
+                    {/* The number sits beside the title, not above it: the
+                        title is a block so a credit can stack under it, which
+                        would otherwise push a bare `{i + 1}` onto its own
+                        line. */}
+                    <div className="flex gap-2">
+                      <span className="shrink-0">{i + 1}</span>
+                      <span className="min-w-0 flex-1">
+                        <SongTitle
+                          title={s.name}
+                          originalArtist={s.originalArtist}
+                          meta={meta}
+                        />
+                      </span>
+                    </div>
                   </li>
                 );
               })}

@@ -84,7 +84,7 @@ export function uploadTrack(u: BandUpload): PlaylistTrack {
     fileName: u.fileName,
     mimeType: u.mimeType,
     href: `/notes/${u.conversationId}/practice?from=audio`,
-    originalBand: u.originalBand ?? undefined,
+    originalArtist: u.originalArtist ?? undefined,
     bpm: u.bpm,
     songKey: u.key,
     subtitle: u.label || u.fileName,

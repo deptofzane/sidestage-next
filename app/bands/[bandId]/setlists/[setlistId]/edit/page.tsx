@@ -29,6 +29,7 @@ export default async function EditSetlistPage({
     .map((c) => ({
       conversationId: c.id,
       name: c.audioFileName ?? 'Untitled audio',
+      originalArtist: c.originalArtist,
     }));
 
   return (
@@ -41,6 +42,7 @@ export default async function EditSetlistPage({
           id: s.id,
           conversationId: s.conversationId,
           name: s.name,
+          originalArtist: s.originalArtist,
         }))}
         bandSongs={bandSongs}
       />

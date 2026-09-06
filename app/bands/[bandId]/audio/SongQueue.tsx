@@ -222,9 +222,9 @@ export function SongQueue() {
                       {t.title}
                     </span>
                   )}
-                  {t.originalBand && (
+                  {t.originalArtist && (
                     <span className="block truncate text-xs minor-text-theme-colors">
-                      Originally by {t.originalBand}
+                      Originally by {t.originalArtist}
                     </span>
                   )}
                   {t.subtitle && (

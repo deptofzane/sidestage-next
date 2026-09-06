@@ -78,6 +78,7 @@ export function AlbumEditor({
     id: row.id,
     conversationId: row.conversationId!,
     name: row.name,
+    originalArtist: row.originalArtist,
   });
 
   const tracks = items.map(asTrack);

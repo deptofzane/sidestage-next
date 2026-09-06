@@ -242,14 +242,14 @@ export async function renameConversation(
 }
 
 /**
- * Update a song's optional metadata (original band / tempo / key). Only the
+ * Update a song's optional metadata (original artist / tempo / key). Only the
  * provided fields are changed; pass `null` to clear one. All are optional and
  * start blank.
  */
 export async function setConversationMeta(
   conversationId: string,
   fields: {
-    originalBand?: string | null;
+    originalArtist?: string | null;
     bpm?: number | null;
     key?: string | null;
   },

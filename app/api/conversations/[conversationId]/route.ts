@@ -21,7 +21,7 @@ import { notify } from '@/lib/db/notifications';
  *
  * PATCH  /api/conversations/[conversationId]
  *   Body may include any of:
- *   { closed?, name?, bandId?, archived?, originalBand?, bpm?, key? }
+ *   { closed?, name?, bandId?, archived?, originalArtist?, bpm?, key? }
  *   — open/close, rename, move to another band you belong to, archive, or set
  *   the optional tempo / key (send null to clear either).
  *
@@ -130,27 +130,30 @@ export async function PATCH(
     }
   }
 
-  // Optional song metadata (original band / tempo / key). Present-but-unchanged
+  // Optional song metadata (original artist / tempo / key). Present-but-unchanged
   // is a no-op; send null to clear any of them.
   const meta: {
-    originalBand?: string | null;
+    originalArtist?: string | null;
     bpm?: number | null;
     key?: string | null;
   } = {};
-  if ('originalBand' in body) {
-    const raw = body.originalBand;
-    let originalBand: string | null;
-    if (raw === null || raw === '') originalBand = null;
+  if ('originalArtist' in body) {
+    const raw = body.originalArtist;
+    let originalArtist: string | null;
+    if (raw === null || raw === '') originalArtist = null;
     else if (typeof raw === 'string') {
       const t = raw.trim();
-      originalBand = t ? t.slice(0, 120) : null;
+      originalArtist = t ? t.slice(0, 120) : null;
     } else
       return NextResponse.json(
-        { error: 'bad_original_band', message: 'Original band must be text.' },
+        {
+          error: 'bad_original_artist',
+          message: 'Original artist must be text.',
+        },
         { status: 400 },
       );
-    if (originalBand !== (conversation.originalBand ?? null))
-      meta.originalBand = originalBand;
+    if (originalArtist !== (conversation.originalArtist ?? null))
+      meta.originalArtist = originalArtist;
   }
   if ('bpm' in body) {
     const raw = body.bpm;
@@ -188,7 +191,7 @@ export async function PATCH(
     if (key !== (conversation.key ?? null)) meta.key = key;
   }
   if (
-    meta.originalBand !== undefined ||
+    meta.originalArtist !== undefined ||
     meta.bpm !== undefined ||
     meta.key !== undefined
   ) {

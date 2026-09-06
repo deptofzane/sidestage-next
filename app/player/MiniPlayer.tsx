@@ -54,7 +54,7 @@ function PlayPauseIcon({ isPlaying }: { isPlaying: boolean }) {
 /** Title, queue position, elapsed/total and the progress line. */
 function TrackColumn({
   title,
-  originalBand,
+  originalArtist,
   subtitle,
   position,
   total,
@@ -64,7 +64,7 @@ function TrackColumn({
   onSeek,
 }: {
   title: string;
-  originalBand?: string;
+  originalArtist?: string;
   subtitle?: string;
   position: number;
   total: number;
@@ -133,9 +133,9 @@ function TrackColumn({
         </div>
       )}
       {/* Above the subtitle, which is where tempo and key land. */}
-      {originalBand && !error && (
+      {originalArtist && !error && (
         <p className="truncate text-[0.6875rem] minor-text-theme-colors">
-          Originally by {originalBand}
+          Originally by {originalArtist}
         </p>
       )}
       {subtitle && !error && (
@@ -187,7 +187,7 @@ function PeekRow({
       </div>
       <TrackColumn
         title={track.title}
-        originalBand={track.originalBand}
+        originalArtist={track.originalArtist}
         subtitle={track.subtitle}
         position={position}
         total={total}
@@ -512,7 +512,7 @@ export function MiniPlayer({
 
           <TrackColumn
             title={track.title}
-            originalBand={track.originalBand}
+            originalArtist={track.originalArtist}
             subtitle={track.subtitle}
             position={index + 1}
             total={queue.length}

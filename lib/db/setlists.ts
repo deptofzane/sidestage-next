@@ -20,7 +20,7 @@ export interface SetlistSong {
   /** Audio duration in whole seconds; null for markers / unknown. */
   songLength: number | null;
   /** Who the song is originally by; null for markers / unset. */
-  originalBand: string | null;
+  originalArtist: string | null;
   /** Optional song tempo; null for markers / unset. */
   bpm: number | null;
   /** Optional song key; null for markers / unset. */
@@ -130,7 +130,7 @@ export async function getSetlist(
       id: setlistSongs.id,
       conversationId: setlistSongs.conversationId,
       audioFileName: conversations.audioFileName,
-      originalBand: conversations.originalBand,
+      originalArtist: conversations.originalArtist,
       bpm: conversations.bpm,
       key: conversations.key,
       label: setlistSongs.label,
@@ -192,7 +192,7 @@ export async function getSetlist(
       : [],
     name: resolveName(r.audioFileName, r.label),
     songLength: r.songLength,
-    originalBand: r.originalBand,
+    originalArtist: r.originalArtist,
     bpm: r.bpm,
     key: r.key,
     audioStoredName: r.audioStoredName,
@@ -288,7 +288,7 @@ export async function listBandSetlists(
       id: setlistSongs.id,
       conversationId: setlistSongs.conversationId,
       audioFileName: conversations.audioFileName,
-      originalBand: conversations.originalBand,
+      originalArtist: conversations.originalArtist,
       bpm: conversations.bpm,
       key: conversations.key,
       label: setlistSongs.label,
@@ -350,7 +350,7 @@ export async function listBandSetlists(
       conversationId: s.conversationId,
       name: resolveName(s.audioFileName, s.label),
       songLength: s.songLength,
-      originalBand: s.originalBand,
+      originalArtist: s.originalArtist,
       bpm: s.bpm,
       key: s.key,
       audioStoredName: s.audioStoredName,
@@ -408,7 +408,7 @@ export interface PracticeSong {
   title: string;
   mimeType: string;
   /** Who the song is originally by; null for markers and for the band's own. */
-  originalBand: string | null;
+  originalArtist: string | null;
   /** Tempo / musical key; null for markers and for songs that haven't set them. */
   bpm: number | null;
   songKey: string | null;
@@ -439,7 +439,7 @@ export async function getSetlistPracticeSongs(
     .select({
       conversationId: setlistSongs.conversationId,
       audioFileName: conversations.audioFileName,
-      originalBand: conversations.originalBand,
+      originalArtist: conversations.originalArtist,
       bpm: conversations.bpm,
       key: conversations.key,
       label: setlistSongs.label,
@@ -491,7 +491,7 @@ export async function getSetlistPracticeSongs(
         conversationId: null,
         title: r.label ?? 'Set break',
         mimeType: '',
-        originalBand: null,
+        originalArtist: null,
         bpm: null,
         songKey: null,
         sheetMusic: null,
@@ -504,7 +504,7 @@ export async function getSetlistPracticeSongs(
       conversationId: r.conversationId,
       title: r.audioFileName ?? audio?.fileName ?? 'Untitled audio',
       mimeType: audio?.mimeType ?? 'audio/mpeg',
-      originalBand: r.originalBand,
+      originalArtist: r.originalArtist,
       bpm: r.bpm,
       songKey: r.key,
       audioVersions: (versionsByConv.get(r.conversationId) ?? []).map((v) => ({
@@ -536,7 +536,7 @@ export async function getConversationPracticeSong(
   const [conv] = await db
     .select({
       audioFileName: conversations.audioFileName,
-      originalBand: conversations.originalBand,
+      originalArtist: conversations.originalArtist,
       bpm: conversations.bpm,
       key: conversations.key,
     })
@@ -567,7 +567,7 @@ export async function getConversationPracticeSong(
     conversationId,
     title: conv.audioFileName ?? audio?.fileName ?? 'Untitled audio',
     mimeType: audio?.mimeType ?? 'audio/mpeg',
-    originalBand: conv.originalBand,
+    originalArtist: conv.originalArtist,
     bpm: conv.bpm,
     songKey: conv.key,
     audioVersions: files

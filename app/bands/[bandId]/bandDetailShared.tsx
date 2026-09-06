@@ -14,7 +14,7 @@ export interface Conversation {
   closed: boolean;
   archived: boolean;
   /** Who the song is originally by, for covers; null when it's the band's own. */
-  originalBand: string | null;
+  originalArtist: string | null;
   bpm: number | null;
   key: string | null;
   /** When the song was added to the band — the Uploads history's sort key. */
@@ -58,7 +58,7 @@ export interface Setlist {
     id: string;
     conversationId: string | null;
     name: string;
-    originalBand: string | null;
+    originalArtist: string | null;
     bpm: number | null;
     key: string | null;
     /** Duration in seconds; null for markers / unknown. */
@@ -100,7 +100,7 @@ export function setlistQueue(sl: {
       fileName: s.audioStoredName!,
       mimeType: s.audioMimeType ?? undefined,
       href: `/notes/${s.conversationId}/practice`,
-      originalBand: s.originalBand ?? undefined,
+      originalArtist: s.originalArtist ?? undefined,
       bpm: s.bpm,
       songKey: s.key,
       subtitle: sl.name,
@@ -129,7 +129,7 @@ export function albumQueue(album: {
     audioStoredName: string | null;
     audioMimeType: string | null;
     songLength: number | null;
-    originalBand: string | null;
+    originalArtist: string | null;
     bpm: number | null;
     key: string | null;
   }[];
@@ -145,7 +145,7 @@ export function albumQueue(album: {
       fileName: t.audioStoredName!,
       mimeType: t.audioMimeType ?? undefined,
       href: `/notes/${t.conversationId}/practice`,
-      originalBand: t.originalBand ?? undefined,
+      originalArtist: t.originalArtist ?? undefined,
       bpm: t.bpm,
       songKey: t.key,
       subtitle: album.name,

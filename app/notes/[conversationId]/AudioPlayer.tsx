@@ -49,7 +49,7 @@ type AudioPlayerProps = {
   bpm?: number | null;
   songKey?: string | null;
   /** Who the song is originally by — shown by the rail variant, for covers. */
-  originalBand?: string | null;
+  originalArtist?: string | null;
   /**
    * `bar` is the horizontal player. `rail` is the Practice page's desktop
    * form: a narrow vertical strip that leaves the sheet music its width.
@@ -85,7 +85,7 @@ export function AudioPlayer({
   hasPracticeOptions = true,
   bpm,
   songKey,
-  originalBand,
+  originalArtist,
   variant = 'bar',
 }: AudioPlayerProps) {
   const { setEngine } = usePlayer();
@@ -339,7 +339,7 @@ export function AudioPlayer({
       sticky={sticky}
       bpm={bpm}
       songKey={songKey}
-      originalBand={originalBand}
+      originalArtist={originalArtist}
       variant={variant}
       onTogglePlay={togglePlay}
       onSeek={seekTo}
@@ -513,7 +513,7 @@ function VersionsIcon() {
  */
 function AudioPlayerRail({
   fileName,
-  originalBand,
+  originalArtist,
   bpm,
   songKey,
   currentTime,
@@ -527,7 +527,7 @@ function AudioPlayerRail({
   versions,
 }: {
   fileName: string;
-  originalBand?: string | null;
+  originalArtist?: string | null;
   bpm?: number | null;
   songKey?: string | null;
   currentTime: number;
@@ -563,9 +563,9 @@ function AudioPlayerRail({
         <h2 className="truncate text-sm font-medium" title={fileName}>
           {fileName}
         </h2>
-        {originalBand && (
+        {originalArtist && (
           <p className="truncate text-xs minor-text-theme-colors">
-            Originally by {originalBand}
+            Originally by {originalArtist}
           </p>
         )}
         {songMeta && (
@@ -741,7 +741,7 @@ export function AudioPlayerView({
   sticky = false,
   bpm,
   songKey,
-  originalBand,
+  originalArtist,
   variant = 'bar',
   onTogglePlay,
   onSeek,
@@ -759,7 +759,7 @@ export function AudioPlayerView({
   /** Tempo / musical key, shown in the options panel when either is set. */
   bpm?: number | null;
   songKey?: string | null;
-  originalBand?: string | null;
+  originalArtist?: string | null;
   /** See `AudioPlayerProps.variant`. */
   variant?: 'bar' | 'rail';
   onTogglePlay: () => void;
@@ -813,7 +813,7 @@ export function AudioPlayerView({
     return (
       <AudioPlayerRail
         fileName={fileName}
-        originalBand={originalBand}
+        originalArtist={originalArtist}
         bpm={bpm}
         songKey={songKey}
         currentTime={currentTime}

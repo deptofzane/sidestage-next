@@ -54,7 +54,7 @@ export interface AlbumTrack {
   pinnedFileName: string | null;
   pinnedLabel: string | null;
   /** Song metadata, for the same reasons setlists carry it. */
-  originalBand: string | null;
+  originalArtist: string | null;
   bpm: number | null;
   key: string | null;
 }
@@ -193,7 +193,7 @@ async function tracksByAlbum(
       pinnedFileName: albumTracks.pinnedFileName,
       pinnedLabel: albumTracks.pinnedLabel,
       name: conversations.audioFileName,
-      originalBand: conversations.originalBand,
+      originalArtist: conversations.originalArtist,
       bpm: conversations.bpm,
       key: conversations.key,
       pinnedId: pinned.id,
@@ -240,7 +240,7 @@ async function tracksByAlbum(
       position: r.position,
       pinnedFileName: r.pinnedFileName,
       pinnedLabel: r.pinnedLabel,
-      originalBand: r.originalBand,
+      originalArtist: r.originalArtist,
       bpm: r.bpm,
       key: r.key,
       ...resolved,

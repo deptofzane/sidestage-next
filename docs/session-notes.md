@@ -236,6 +236,31 @@ Last updated: 2 September 2026.
   whatever start is typed, until the user sets one by hand. That mirrors how
   `endTime` already follows `time` until `endEdited` flips — one mechanism,
   not two. Private band notes _are_ carried over; event members are not.
+- **A cover's original artist stacks under its title, everywhere.**
+  `<SongTitle>` emits two block lines, each truncating on its own, rather than
+  one inline run — which is the whole reason it is shaped that way: a wrapper
+  carrying `truncate` sets `white-space: nowrap`, and a nested line inherits
+  that and gets clipped onto the same row instead of wrapping. So the callers
+  keep `min-w-0` and **drop their own `truncate`**, and each line ellipsises
+  separately. Tempo and key ride the credit line (`meta`) rather than taking a
+  third. A numbered row has to put its number in a flex row beside the title,
+  not before it — a bare `{i + 1}` in front of a block lands on its own line
+  (this bit the Setlist tab panel).
+  The words "Originally by" are not shortened to a bare dash: "Title / Pink
+  Floyd" reads as who is _performing_ it, the opposite of what the field means.
+- **`SetlistItem.originalArtist` and `SetlistPoolSong.originalArtist` are
+  required, not optional.** Same reason as `LabelledEvent.createdByName`:
+  optional let three mappings silently drop the field and render a cover with
+  no credit, which looks identical to a song that simply has none. Making it
+  required turned the compiler into the worklist — it found all eight sites,
+  including two in the album editor that reuses these types.
+- **The column is `original_artist`, renamed from `original_band`
+  (migration 0056).** `drizzle-kit generate` could not tell the rename from a
+  drop-and-add without a prompt and refused rather than guessing, which is the
+  behaviour you want: the wrong guess is `DROP COLUMN` applied unattended by
+  `preDeployCommand`. 0056 is hand-written as a `RENAME`, with a hand-built
+  snapshot — re-running `db:generate` reports no drift, which is how you check
+  a hand-written snapshot is right.
 - **`/` is dynamic and public.** Signed out it's a landing page; signed in it
   redirects to `/home`. `start_url` stays `/` so installed apps are unaffected
   and no manifest refetch is needed. It is deliberately _not_ precached — its

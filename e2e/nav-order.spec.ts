@@ -227,6 +227,24 @@ test.describe('desktop is left alone', () => {
     hasTouch: false,
   });
 
+  test('the band panel keeps its choices under Back', async ({ page }) => {
+    await page.goto('/home');
+    const drawer = await openDrawer(page);
+    await page.getByRole('menuitem', { name: /^Band/ }).click();
+
+    const back = (await page
+      .getByRole('menuitem', { name: 'Back' })
+      .boundingBox())!;
+    const viewBands = (await page
+      .getByRole('menuitem', { name: 'View bands' })
+      .boundingBox())!;
+    const box = (await drawer.boundingBox())!;
+
+    // Directly under Back, not anchored to the bottom as the phone has them.
+    expect(viewBands.y - (back.y + back.height)).toBeLessThan(40);
+    expect(viewBands.y).toBeLessThan(box.y + box.height / 2);
+  });
+
   test('Close sits at the top right', async ({ page }) => {
     await page.goto('/home');
     await openDrawer(page);

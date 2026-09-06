@@ -12,6 +12,7 @@ import { dayLabel, groupByDay, timeLabel, uploadTrack } from './uploadDays';
 import { usePlaylistPlayer } from '../../../player/PlaylistPlayer';
 import { LoadMore } from '../../../LoadMore';
 import { LoadingBlock } from '../../../Spinner';
+import { SongTitle } from '../../../SongTitle';
 
 /**
  * The Uploads tab: the band's audio files grouped by the day they arrived,
@@ -135,7 +136,10 @@ export function UploadHistory({ bandId }: { bandId: string }) {
                         href={`/notes/${u.conversationId}/practice?from=audio`}
                         className="min-w-0 flex-1 px-4 py-3 text-sm md:px-3 md:py-1.5"
                       >
-                        <span className="block truncate">{u.title}</span>
+                        <SongTitle
+                          title={u.title}
+                          originalArtist={u.originalArtist}
+                        />
                         {/* The file, so two takes of one song are tellable apart. */}
                         <span className="block truncate text-xs minor-text-theme-colors">
                           {u.label || u.fileName}

@@ -60,7 +60,7 @@ test('songs: metadata fields are named', () => {
     'updated the tempo and key on Wildfire',
   );
   assert.equal(
-    describeSongChange(['originalBand'], 'Wildfire'),
+    describeSongChange(['originalArtist'], 'Wildfire'),
     'updated the original artist on Wildfire',
   );
 });
@@ -91,7 +91,10 @@ test('songs: a move names the destination band', () => {
 });
 
 test('songs: archive and unarchive are distinct', () => {
-  assert.equal(describeSongChange(['archived'], 'Wildfire'), 'archived Wildfire');
+  assert.equal(
+    describeSongChange(['archived'], 'Wildfire'),
+    'archived Wildfire',
+  );
   assert.equal(
     describeSongChange(['unarchived'], 'Wildfire'),
     'unarchived Wildfire',
@@ -101,7 +104,9 @@ test('songs: archive and unarchive are distinct', () => {
 test('songs: one headline wins, the rest are counted', () => {
   // EditSongClient saves everything in one PATCH, so combinations are normal.
   assert.equal(
-    describeSongChange(['name', 'bpm'], 'Wildfire', { previousLabel: 'Blue Room' }),
+    describeSongChange(['name', 'bpm'], 'Wildfire', {
+      previousLabel: 'Blue Room',
+    }),
     'renamed Blue Room to Wildfire, and 1 more change',
   );
   assert.equal(
@@ -125,5 +130,9 @@ test('songs: priority is move > archive > rename', () => {
 test('songs: nothing to say falls back to the caller', () => {
   assert.equal(describeSongChange(null, 'X'), null);
   assert.equal(describeSongChange([], 'X'), null);
-  assert.equal(describeSongChange(['closed'], 'X'), null, 'not a reported field');
+  assert.equal(
+    describeSongChange(['closed'], 'X'),
+    null,
+    'not a reported field',
+  );
 });

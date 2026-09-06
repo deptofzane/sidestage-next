@@ -35,7 +35,7 @@ export function EditSongClient({
   initialName,
   initialBandId,
   initialArchived,
-  initialOriginalBand,
+  initialOriginalArtist,
   initialBpm,
   initialKey,
   bands,
@@ -47,7 +47,7 @@ export function EditSongClient({
   initialName: string;
   initialBandId: string;
   initialArchived: boolean;
-  initialOriginalBand: string | null;
+  initialOriginalArtist: string | null;
   initialBpm: number | null;
   initialKey: string | null;
   bands: BandOption[];
@@ -62,7 +62,9 @@ export function EditSongClient({
   const [name, setName] = useState(initialName);
   const [bandId, setBandId] = useState(initialBandId);
   const [archived, setArchived] = useState(initialArchived);
-  const [originalBand, setOriginalBand] = useState(initialOriginalBand ?? '');
+  const [originalArtist, setOriginalArtist] = useState(
+    initialOriginalArtist ?? '',
+  );
   const [bpm, setBpm] = useState(initialBpm != null ? String(initialBpm) : '');
   const [key, setKey] = useState(initialKey ?? '');
   const [busy, setBusy] = useState(false);
@@ -74,19 +76,19 @@ export function EditSongClient({
   // never need to change after mount.
   const savedName = initialName;
   const savedBandId = initialBandId;
-  const savedOriginalBand = initialOriginalBand ?? '';
+  const savedOriginalArtist = initialOriginalArtist ?? '';
   const savedBpm = initialBpm != null ? String(initialBpm) : '';
   const savedKey = initialKey ?? '';
 
   const songHref = `/notes/${conversationId}`;
   const nameTrim = name.trim();
-  const originalBandTrim = originalBand.trim();
+  const originalArtistTrim = originalArtist.trim();
   const bpmTrim = bpm.trim();
   const keyTrim = key.trim();
   const dirty =
     nameTrim !== savedName ||
     bandId !== savedBandId ||
-    originalBandTrim !== savedOriginalBand ||
+    originalArtistTrim !== savedOriginalArtist ||
     bpmTrim !== savedBpm ||
     keyTrim !== savedKey;
   const canSave = dirty && nameTrim !== '' && !busy;
@@ -151,8 +153,9 @@ export function EditSongClient({
     const payload: Record<string, unknown> = {};
     if (nameTrim !== savedName) payload.name = nameTrim;
     if (bandId !== savedBandId) payload.bandId = bandId;
-    if (originalBandTrim !== savedOriginalBand)
-      payload.originalBand = originalBandTrim === '' ? null : originalBandTrim;
+    if (originalArtistTrim !== savedOriginalArtist)
+      payload.originalArtist =
+        originalArtistTrim === '' ? null : originalArtistTrim;
     if (bpmTrim !== savedBpm) payload.bpm = nextBpm;
     if (keyTrim !== savedKey) payload.key = nextKey;
 
@@ -248,14 +251,16 @@ export function EditSongClient({
         </p>
       </section>
 
-      {/* Details (original band / tempo / key) */}
+      {/* Details (original artist / tempo / key) */}
       <section className="flex flex-col gap-2">
         <label className="text-sm font-medium">Details</label>
         <div className="flex flex-col gap-1">
-          <span className="text-xs minor-text-theme-colors">Original band</span>
+          <span className="text-xs minor-text-theme-colors">
+            Original artist
+          </span>
           <input
-            value={originalBand}
-            onChange={(e) => setOriginalBand(e.target.value)}
+            value={originalArtist}
+            onChange={(e) => setOriginalArtist(e.target.value)}
             maxLength={120}
             placeholder="e.g. Fleetwood Mac"
             className={inputCls}

@@ -22,6 +22,7 @@ import {
 } from '../notes/[conversationId]/PlayerContext';
 import { NotesPanel } from '../notes/[conversationId]/NotesPanel';
 import type { RepeatMode } from './queueOrder';
+import { SongTitle } from '../SongTitle';
 
 /** Hover text per repeat mode — what the button is currently doing. */
 const REPEAT_TITLE: Record<RepeatMode, string> = {
@@ -172,6 +173,13 @@ export function FullPlayer({
               </Link>
             ) : (
               <h2 className="truncate text-lg font-semibold">{track.title}</h2>
+            )}
+            {/* Above the subtitle, where tempo and key land — same order the
+                mini player uses. */}
+            {track.originalArtist && (
+              <p className="truncate text-sm minor-text-theme-colors">
+                Originally by {track.originalArtist}
+              </p>
             )}
             {track.subtitle && (
               <p className="truncate text-sm minor-text-theme-colors">
@@ -404,11 +412,14 @@ export function FullPlayer({
                           </span>
                           <span
                             className={
-                              'min-w-0 flex-1 truncate ' +
+                              'min-w-0 flex-1 ' +
                               (isCurrent ? 'font-medium' : '')
                             }
                           >
-                            {t.title}
+                            <SongTitle
+                              title={t.title}
+                              originalArtist={t.originalArtist}
+                            />
                           </span>
                           {t.durationSec != null && (
                             <span className="shrink-0 text-xs tabular-nums minor-text-theme-colors">

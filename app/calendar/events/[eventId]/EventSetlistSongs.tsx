@@ -21,12 +21,13 @@ import {
   usePlaylistPlayer,
   type PlaylistTrack,
 } from '../../../player/PlaylistPlayer';
+import { SongTitle } from '../../../SongTitle';
 
 interface SongItem {
   id: string;
   conversationId: string | null;
   name: string;
-  originalBand: string | null;
+  originalArtist: string | null;
   bpm: number | null;
   key: string | null;
   songLength: number | null;
@@ -86,7 +87,7 @@ export function EventSetlistSongs({
     fileName: s.audioStoredName!,
     mimeType: s.audioMimeType ?? undefined,
     href: `/notes/${s.conversationId}/practice`,
-    originalBand: s.originalBand ?? undefined,
+    originalArtist: s.originalArtist ?? undefined,
     bpm: s.bpm,
     songKey: s.key,
     subtitle: setlistName,
@@ -210,11 +211,11 @@ export function EventSetlistSongs({
 
               <span
                 className={
-                  'min-w-0 flex-1 truncate py-3 ml-2' +
+                  'min-w-0 flex-1 py-3 ml-2' +
                   (isCurrent ? 'font-medium text-accent-strong' : '')
                 }
               >
-                {s.name}
+                <SongTitle title={s.name} originalArtist={s.originalArtist} />
                 {s.songLength != null && (
                   <span className="text-neutral-400">
                     {` - ${formatDuration(s.songLength)}`}

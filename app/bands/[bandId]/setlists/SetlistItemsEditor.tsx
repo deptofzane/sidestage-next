@@ -26,18 +26,28 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Modal } from '../../../Modal';
+import { SongTitle } from '../../../SongTitle';
 
 /** A setlist entry: a song (conversationId) or a marker (set break / custom). */
 export interface SetlistItem {
   id: string;
   conversationId: string | null;
   name: string;
+  /**
+   * Who it's originally by, for covers; null on markers and originals.
+   *
+   * Required, not optional, for the reason `LabelledEvent.createdByName` is:
+   * optional lets a caller quietly drop it and render a title with no credit,
+   * which looks like a song that simply has no artist set.
+   */
+  originalArtist: string | null;
 }
 
 /** A song the user can add — the band's unarchived songs. */
 export interface SetlistPoolSong {
   conversationId: string;
   name: string;
+  originalArtist: string | null;
 }
 
 /** Client-side row id (real ids are assigned by the server on save). */
@@ -117,13 +127,23 @@ export function SetlistItemsEditor({
   const addSetBreak = () =>
     onItemsChange((prev) => [
       ...prev,
-      { id: makeSetlistRowId(), conversationId: null, name: 'Set break' },
+      {
+        id: makeSetlistRowId(),
+        conversationId: null,
+        name: 'Set break',
+        originalArtist: null,
+      },
     ]);
 
   const addEncore = () =>
     onItemsChange((prev) => [
       ...prev,
-      { id: makeSetlistRowId(), conversationId: null, name: 'Encore' },
+      {
+        id: makeSetlistRowId(),
+        conversationId: null,
+        name: 'Encore',
+        originalArtist: null,
+      },
     ]);
 
   const addOther = () => {
@@ -131,7 +151,12 @@ export function SetlistItemsEditor({
     if (!label) return;
     onItemsChange((prev) => [
       ...prev,
-      { id: makeSetlistRowId(), conversationId: null, name: label },
+      {
+        id: makeSetlistRowId(),
+        conversationId: null,
+        name: label,
+        originalArtist: null,
+      },
     ]);
     setOtherName('');
     setOtherOpen(false);
@@ -174,6 +199,7 @@ export function SetlistItemsEditor({
         id: makeSetlistRowId(),
         conversationId: s.conversationId,
         name: s.name,
+        originalArtist: s.originalArtist,
       }));
     onItemsChange((prev) => [...prev, ...picks]);
     setAddOpen(false);
@@ -244,6 +270,7 @@ export function SetlistItemsEditor({
                     key={s.id}
                     id={s.id}
                     name={s.name}
+                    originalArtist={s.originalArtist}
                     isMarker={!s.conversationId}
                     onRemove={() => handleRemove(s.id)}
                     actions={renderItemActions?.(s)}
@@ -306,8 +333,11 @@ export function SetlistItemsEditor({
                             onChange={() => toggleAdd(s.conversationId)}
                             className="h-4 w-4"
                           />
-                          <span className="min-w-0 flex-1 truncate font-medium">
-                            {s.name}
+                          <span className="min-w-0 flex-1 font-medium">
+                            <SongTitle
+                              title={s.name}
+                              originalArtist={s.originalArtist}
+                            />
                           </span>
                         </label>
                       </li>
@@ -390,12 +420,14 @@ export function SetlistItemsEditor({
 function SortableRow({
   id,
   name,
+  originalArtist,
   isMarker,
   onRemove,
   actions,
 }: {
   id: string;
   name: string;
+  originalArtist: string | null;
   isMarker: boolean;
   onRemove: () => void;
   /** Caller-supplied control, between the name and the remove button. */
@@ -432,13 +464,13 @@ function SortableRow({
         <span aria-hidden="true">⠿</span>
       </button>
       <span
-        className={`min-w-0 flex-1 truncate ${
+        className={`min-w-0 flex-1 ${
           isMarker
             ? 'text-xs font-semibold uppercase tracking-wide minor-text-theme-colors'
             : 'font-medium'
         }`}
       >
-        {name}
+        <SongTitle title={name} originalArtist={originalArtist} />
       </span>
       {actions}
       <button

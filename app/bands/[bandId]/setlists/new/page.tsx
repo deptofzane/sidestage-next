@@ -24,7 +24,11 @@ export default async function NewSetlistPage({
 
   const songs = (await listBandConversations(bandId))
     .filter((c) => !c.archived)
-    .map((c) => ({ id: c.id, name: c.audioFileName ?? 'Untitled audio' }));
+    .map((c) => ({
+      id: c.id,
+      name: c.audioFileName ?? 'Untitled audio',
+      originalArtist: c.originalArtist,
+    }));
 
   return (
     <main className="main-container">

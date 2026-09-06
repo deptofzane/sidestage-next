@@ -28,6 +28,7 @@ export default async function NewAlbumPage({
     .map((c) => ({
       conversationId: c.id,
       name: c.audioFileName ?? 'Untitled audio',
+      originalArtist: c.originalArtist,
     }));
 
   return (

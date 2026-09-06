@@ -60,7 +60,7 @@ export function tracksForNotification(
     fileName: c.audioStoredName ?? undefined,
     mimeType: c.audioMimeType ?? undefined,
     href: `/notes/${c.id}/practice?from=audio`,
-    originalBand: c.originalBand ?? undefined,
+    originalArtist: c.originalArtist ?? undefined,
     bpm: c.bpm,
     songKey: c.key,
     subtitle: n.bandName ?? undefined,

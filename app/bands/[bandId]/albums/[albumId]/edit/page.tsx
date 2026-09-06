@@ -30,6 +30,7 @@ export default async function EditAlbumPage({
     .map((c) => ({
       conversationId: c.id,
       name: c.audioFileName ?? 'Untitled audio',
+      originalArtist: c.originalArtist,
     }));
 
   // The editor's row id is the album_tracks id, so a song appearing twice
@@ -38,6 +39,7 @@ export default async function EditAlbumPage({
     id: t.id,
     conversationId: t.conversationId,
     name: t.name,
+    originalArtist: t.originalArtist,
     // A lost pin has no id left to send back; the editor shows it as deleted
     // and saving as-is drops the pin, which is the honest outcome.
     audioVersionId: t.state === 'pinned' ? t.audioVersionId : null,

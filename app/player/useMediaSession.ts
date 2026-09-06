@@ -69,9 +69,9 @@ export function useMediaSession({
     }
     navigator.mediaSession.metadata = new MediaMetadata({
       title: track.title,
-      // The cover's original band when there is one, else whatever the queue
+      // The cover's original artist when there is one, else whatever the queue
       // labelled the row with (the band, or the upload day).
-      artist: track.originalBand ?? track.subtitle ?? '',
+      artist: track.originalArtist ?? track.subtitle ?? '',
       album: track.subtitle ?? '',
       artwork: [
         { src: appIcons.icon192, sizes: '192x192', type: 'image/png' },
@@ -121,36 +121,37 @@ export function useMediaSession({
 
     // `null` un-registers, which is how the OS is told a control shouldn't be
     // offered — greying out next/previous at the ends of the queue.
-    const handlers: Array<[MediaSessionAction, MediaSessionActionHandler | null]> =
+    const handlers: Array<
+      [MediaSessionAction, MediaSessionActionHandler | null]
+    > = [
+      ['play', () => actions.play()],
+      ['pause', () => actions.pause()],
+      ['stop', () => actions.stop()],
+      ['nexttrack', canNext ? () => actions.next() : null],
+      ['previoustrack', canPrevious ? () => actions.previous() : null],
       [
-        ['play', () => actions.play()],
-        ['pause', () => actions.pause()],
-        ['stop', () => actions.stop()],
-        ['nexttrack', canNext ? () => actions.next() : null],
-        ['previoustrack', canPrevious ? () => actions.previous() : null],
-        [
-          'seekto',
-          (details) => {
-            if (typeof details.seekTime === 'number') {
-              actions.seek(details.seekTime);
-            }
-          },
-        ],
-        [
-          'seekforward',
-          (details) =>
-            actions.seek(
-              actions.getPosition() + (details.seekOffset ?? SEEK_STEP_SEC),
-            ),
-        ],
-        [
-          'seekbackward',
-          (details) =>
-            actions.seek(
-              actions.getPosition() - (details.seekOffset ?? SEEK_STEP_SEC),
-            ),
-        ],
-      ];
+        'seekto',
+        (details) => {
+          if (typeof details.seekTime === 'number') {
+            actions.seek(details.seekTime);
+          }
+        },
+      ],
+      [
+        'seekforward',
+        (details) =>
+          actions.seek(
+            actions.getPosition() + (details.seekOffset ?? SEEK_STEP_SEC),
+          ),
+      ],
+      [
+        'seekbackward',
+        (details) =>
+          actions.seek(
+            actions.getPosition() - (details.seekOffset ?? SEEK_STEP_SEC),
+          ),
+      ],
+    ];
 
     const registered: MediaSessionAction[] = [];
     for (const [action, handler] of handlers) {

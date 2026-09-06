@@ -179,7 +179,7 @@ export const conversations = pgTable(
     // Optional song metadata — all start blank, none are required.
     // Who the song is originally by, for covers. Free text: the original
     // artist usually isn't a band in this app, so there's nothing to link to.
-    originalBand: text('original_band'),
+    originalArtist: text('original_artist'),
     bpm: integer('bpm'), // tempo in beats per minute
     key: text('song_key'), // musical key, free text (e.g. "Am", "C#")
     closed: boolean('closed').notNull().default(false),
